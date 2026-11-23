@@ -903,9 +903,6 @@ int WALLCR_ShouldSurpriseAttack(Instance *instance)
     return 0;
 }
 
-#ifndef NON_MATCHING
-INCLUDE_ASM("asm/nonmatchings/Overlays/wallcr/wallcr", WALLCR_MoveToDestination);
-#else
 int WALLCR_MoveToDestination(Instance *instance, Position *target)
 {
     Position pos;
@@ -958,7 +955,8 @@ int WALLCR_MoveToDestination(Instance *instance, Position *target)
             }
         }
 
-        return 1;
+        // jumping to the shared return at the end gives the target's block layout
+        goto done;
     }
 
     result = WALLCR_SeekPath(instance, &pos, &mv->destination, 0, 0x181A1F);
@@ -991,8 +989,10 @@ int WALLCR_MoveToDestination(Instance *instance, Position *target)
     }
 
     return 0;
+
+done:
+    return 1;
 }
-#endif
 
 void WALLCR_Message(Instance *instance, unsigned long message, unsigned long data)
 {
