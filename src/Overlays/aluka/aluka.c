@@ -456,22 +456,23 @@ void ALUKA_MoveForward(Instance *instance, int time, int depth)
     }
 }
 
-#ifndef NON_MATCHING
-INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_FixPitch);
-#else
 void ALUKA_FixPitch(Instance *instance, int depth)
 {
     AlukaAttributes *attrs; // not from debug symbols
     int pitch; // not from debug symbols
     int min; // not from debug symbols
     int diff; // not from debug symbols
+    int fullCircle; // not from debug symbols
 
     attrs = (AlukaAttributes *)((MonsterVars *)instance->extraData)->extraVars;
 
     pitch = attrs->swimfast_pitch & 0xFFF;
     min = attrs->min_swim_depth;
 
-    pitch = (pitch < 2049) ? pitch - min : pitch - (min + 4096);
+    // a variable instead of the constant keeps gcc from rewriting pitch - (min + 4096) as (pitch - 4096) - min
+    fullCircle = 4096;
+
+    pitch = (pitch < 2049) ? pitch - min : pitch - (min + fullCircle);
 
     diff = instance->position.z - depth;
 
@@ -482,7 +483,6 @@ void ALUKA_FixPitch(Instance *instance, int depth)
         ALUKA_SetPitch(instance, attrs->swimfast_pitch);
     }
 }
-#endif
 
 void ALUKA_ProportionalLimitsAndAccels(Instance *instance, int angley, int anglep)
 {
